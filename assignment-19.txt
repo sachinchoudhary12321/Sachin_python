@@ -1,0 +1,29 @@
+def create_tables_from_df(df, name_col, col_col, type_col):
+    table = ""
+    columns = ""
+    for row in df.collect():
+        current_table = row[name_col]
+        column_name = row[col_col]
+        data_type = row[type_col]
+        
+        if current_table != table:
+            if table != "":
+                spark.sql(f"CREATE TABLE IF NOT EXISTS {table} ({columns})")
+            table = current_table
+            columns = f"{column_name} {data_type}"
+        else:
+            columns += f", {column_name} {data_type}"
+    if table != "":
+        spark.sql(f"CREATE TABLE IF NOT EXISTS {table} ({columns})")
+      
+    create_tables_from_df(df, "rawname", "columnname", "datatype")
+    create_tables_from_df(df, "curname", "curcolumn", "curtype")
+    spark.sql(f"insert into user values ('a1','b'), ('a2','b2'), ('a3','b3')")
+    spark.sql(f"select * from user").show()
+
+    spark.sql(f"""
+    INSERT INTO curuser
+    SELECT id, name
+    FROM user
+    WHERE {logic}
+    """)
